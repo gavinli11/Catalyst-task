@@ -1,36 +1,24 @@
 <?php
 
-//Check if user input "--help" command to see available command line directives for this script
-$checkHelp= getopt("",array("help"));
-if(isset($checkHelp["help"])){
-	echo "
-		  --file [csvfile name] - this is the name of the CSV to be parsed\n
-		  --create_table - this will cause the PostgreSQL users table to be built in the 
-		  database (and no further action will be taken\n
-		  --dry_run - this will be used with the --file directive in the instance that we want
-		  to run the script but not insert into the DB. All other functions will be executed,
-		  but the database won't be altered.\n
-		  -u - PostgreSQL username\n
-		  -p - PostgreSQL password\n
-		  -h - PostgreSQL host\n";
-	 
-}
+//get user's input values
+	$input = getopt("u:p:h:d:",array("file:","create_table","dry_run","help"));		
+	$username = $input['u'];
+	$password = $input['p'];
+	$host 	  = $input['h'];
+	$dbname   = $input['d'];
 
-else{
-		//get user's input values
-		$input = getopt("u:p:h:",array("file:","create_table","dry_run"));
-				
-		$username = $input['u'];
-		$password = $input['p'];
-		$host 	  = $input['h'];
+//Check if user input "--help" command 
+if(!isset($input["help"])){
 
-		//establish conection to PostgreSQL
-		$dbconn = pg_connect("host=$host user=$username password=$password");		
-		if(!$dbconn){
-			echo "An error occurred when establish database connection.\n";
-		}
+	//establish conection to PostgreSQL
+	$dbconn = pg_connect("host=$host user=$username password=$password dbname=$dbname");		
+	if(!$dbconn){
+		echo "An error occurred when establish database connection.\n";
+	}
+	
+	//Check if user input "--create_tabel" command
+	if(!isset($input["create_table"])){  
 		
-
 		//read the imported file
 		$fileName = $input["file"];
 		if(($handle= fopen($fileName,"r"))!== FALSE){
@@ -77,15 +65,18 @@ else{
 				$result = pg_query($dbconn,$sql);
 			}
 			fclose($handle);
+
+			echo "Insertion completed\n";
+
 		}
 		else{
 			echo "failed to read the file";
 		}
 
 
-
-	//Check if user input "--create_tabel" to create or rebuild tabel called "users"
-	if(isset($input["create_table"])){
+	}
+	else{
+		//run function "create_table"
 		//Delete any table called "users" if exist
 		$sql = "DROP TABLE IF EXISTS users";
 		pg_query($dbconn,$sql);
@@ -93,6 +84,7 @@ else{
 		//Create a new table called "users"
 		$sql = "CREATE TABLE IF NOT EXISTS users (name varchar (20) NOT NULL, surname varchar(20) NOT NULL, email varchar(40) NOT NULL UNIQUE)";
 		$result = pg_query($dbconn,$sql);
+		echo "Table created\n";
 		if(!$result){
 			echo "An error occured when create the table.\n";
 			exit;
@@ -100,6 +92,20 @@ else{
 	}
 	
 	
+}
+
+else{
+	echo "
+		  --file [csvfile name] - this is the name of the CSV to be parsed\n
+		  --create_table - this will cause the PostgreSQL users table to be built in the 
+		  database (and no further action will be taken\n
+		  --dry_run - this will be used with the --file directive in the instance that we want
+		  to run the script but not insert into the DB. All other functions will be executed,
+		  but the database won't be altered.\n
+		  -u - PostgreSQL username\n
+		  -p - PostgreSQL password\n
+		  -h - PostgreSQL host\n
+		  -d - PostgreSQL database name(this one is optional)\n\n";
 }
 
 
