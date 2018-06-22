@@ -62,11 +62,22 @@ if(!isset($input["help"])){
 				
 				
 				$sql = "INSERT INTO users (name,surname,email) VALUES ($userInfoString)";
-				$result = pg_query($dbconn,$sql);
+				
+				//if "--dry_run" is required, do not execute the sql query
+				if(!isset($input["dry_run"])){
+					$result = pg_query($dbconn,$sql);
+				}
+				
 			}
 			fclose($handle);
 
-			echo "Insertion completed\n";
+
+			if (isset($input["dry_run"])) {
+				echo "\"dry_run\" completed\n";
+			}
+			else{
+				echo "Data insertion completed\n";
+			}
 
 		}
 		else{
@@ -87,7 +98,6 @@ if(!isset($input["help"])){
 		echo "Table created\n";
 		if(!$result){
 			echo "An error occured when create the table.\n";
-			exit;
 		}
 	}
 	
@@ -105,7 +115,7 @@ else{
 		  -u - PostgreSQL username\n
 		  -p - PostgreSQL password\n
 		  -h - PostgreSQL host\n
-		  -d - PostgreSQL database name(this one is optional)\n\n";
+		  -d - PostgreSQL database name\n\n";
 }
 
 
