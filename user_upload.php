@@ -38,7 +38,7 @@ if(!isset($input["help"])){
 
 				//validate if user's email are legal
 				if (preg_match('/[a-zA-Z\']+/',$userInfo[1])==0||preg_match('/^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,5}$/',$userInfo[2])==0){
-					fwrite(STDOUT, "ERROR: $userInfo[0] $userInfo[1]'s email is not legal, no record should be inserted into the table\n");
+					fwrite(STDOUT, "ERROR: $userInfo[0] $userInfo[1]'s email: $userInfo[2] is not legal, no record should be inserted into the table\n");
 					continue;
 				}
 				
